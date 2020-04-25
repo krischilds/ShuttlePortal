@@ -1,2 +1,0 @@
-# ShuttlePortal
-Created with CodeSandbox
