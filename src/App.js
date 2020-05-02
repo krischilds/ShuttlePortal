@@ -5,8 +5,8 @@ import Shuttle from "./Shuttle";
 
 export default function App() {
   return (
-    <div className="App">
+    <>
       <Shuttle />
-    </div>
+    </>
   );
 }

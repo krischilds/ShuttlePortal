@@ -3,56 +3,44 @@ import ShuttleForm from "./ShuttleForm";
 import ShuttleReport from "./ShuttleReport";
 import NavbarTop from "./NavbarTop";
 import { Container } from "reactstrap";
+import DataAccess from "./DataAccess";
 
 class Shuttle extends Component {
   state = {
-    accountName: "",
-    buildings: "",
-    selectedPickup: "",
-    selectedDropoff: "",
-    data: null
+    bookings: null,
+    buildings: null,
+    selectedPickup: -1,
+    selectedDropoff: -1,
+    passengers: -1,
+    spaceType: null,
+    errors: [],
   };
 
   componentDidMount() {
-    // this.loadReportData();
-    // this.getData();
+    this.loadData();
   }
 
-  onChangeAccountName = e => {
-    let accountName = e.target.value;
-    this.loadData(accountName);
+  loadBuildings = () => {
+    DataAccess.getBuildingsAsync().then((buildings) => {
+      this.setState({ buildings });
+    });
   };
 
-  getDataUrl = user => {
-    const dataUrl = `https://api.github.com/users/${user}/repos`;
-    return dataUrl;
+  loadBookings = () => {
+    DataAccess.getLiveBookingsAsync().then((bookings) => {
+      this.setState({ bookings });
+    });
   };
 
-  loadData = user => {
-    if (!user) return;
-    const dataUrl = this.getDataUrl(user);
-    fetch(dataUrl)
-      .then(response => {
-        if (response.ok) return response.json();
-        throw new Error("Request failed.");
-      })
-      .then(data => {
-        console.log(user);
-        console.log(data);
-        this.setState({ data: data, accountName: user });
-      })
-      .catch(error => {
-        console.log(error);
-      });
+  loadData = async () => {
+    let [buildings, bookings] = await Promise.all([
+      DataAccess.getBuildingsAsync(),
+      DataAccess.getLiveBookingsAsync(),
+    ]);
+    this.setState({ bookings, buildings });
   };
 
-  onChangeBuilding = e => {
-    e.preventDefault();
-    console.log("e.target.name = ");
-    console.log(e.target);
-  };
-
-  onChangeBuilding = e => {
+  onChangeBuilding = (e) => {
     e.preventDefault();
     console.log("e.target.name = ");
     console.log(e.target.className);
@@ -63,29 +51,144 @@ class Shuttle extends Component {
     }
   };
 
-  onBookShuttle = e => {
+  onChangeSpaceType = (e) => {
+    console.log("spaceType = " + e.target.value);
+    this.setState({ spaceType: e.target.value });
+  };
+
+  onChangePassengers = (e) => {
+    console.log("passengers = " + e.target.value);
+    this.setState({ passengers: e.target.value });
+  };
+
+  onCancelShuttle = async (confirmationNumber) => {
+    DataAccess.cancelShuttleAsync(confirmationNumber)
+      .then((response) => {
+        console.log(response);
+
+        DataAccess.getLiveBookingsAsync().then((bookings) => {
+          this.setState({
+            bookings,
+          });
+        });
+      })
+      .catch((err) => {
+        const errors = [];
+        errors.push({
+          message: "Error cancelling shuttle.",
+        });
+        this.setState({ errors });
+      });
+  };
+
+  onBookShuttle = async (e) => {
     e.preventDefault();
-    // var items = getBuildingOptions();
-    // console.log(items);
-    if (this.state.selectedPickup && this.state.selectedPickup !== "-1") {
-      if (this.state.selectedDropoff && this.state.selectedDropoff !== "-1") {
-        this.setState({ selectedPickup: "-1", selectedDropoff: "-1" });
-      }
+    const {
+      selectedPickup,
+      selectedDropoff,
+      passengers,
+      spaceType,
+    } = this.state;
+    const errors = this.validateBookingParams(
+      selectedPickup,
+      selectedDropoff,
+      spaceType,
+      passengers
+    );
+    if (errors.length) {
+      this.setState({
+        errors,
+      });
+    } else {
+      DataAccess.bookShuttleAsync(
+        selectedPickup,
+        selectedDropoff,
+        passengers,
+        spaceType
+      )
+        .then((response) => {
+          console.log(response);
+
+          DataAccess.getLiveBookingsAsync().then((bookings) => {
+            this.setState({
+              errors,
+              bookings,
+              selectedPickup: "-1",
+              selectedDropoff: "-1",
+            });
+          });
+        })
+        .catch((err) => {
+          const errors = [];
+          errors.push({
+            message:
+              "Error booking shuttle. Please refresh the browser and try again.",
+          });
+          this.setState({ errors });
+        });
     }
   };
 
+  validateBookingParams(from, to, spaceType, passengers) {
+    const errors = [];
+
+    let err = {
+      message: "",
+      field: "",
+    };
+
+    if (!from || from === "-1" || from === -1) {
+      errors.push({ message: "Select a pickup building" });
+    }
+
+    if (!to || to === "-1" || to === -1) {
+      errors.push({ message: "Select a dropoff building" });
+    }
+
+    if (!spaceType || spaceType === "-1" || spaceType === -1) {
+      errors.push({ message: "Select a space type" });
+    }
+
+    if (!passengers || passengers === "-1" || passengers === -1) {
+      errors.push({ message: "Select number of passengers" });
+    }
+
+    return errors;
+  }
+
   render() {
+    const errors = this.state.errors.map((err, i) => {
+      return (
+        <li key={i} className={"text text-danger"}>
+          {err.message}
+        </li>
+      );
+    });
+
     return (
-      <Container>
+      <>
         <NavbarTop />
-        <ShuttleForm
-          userRole={"Guest User"}
-          onChangeBuilding={this.onChangeBuilding}
-          onBookShuttle={this.onBookShuttle}
-          onChangeAccountName={this.onChangeAccountName}
-        />
-        <ShuttleReport data={this.state.data} />
-      </Container>
+        <Container>
+          <div style={{ display: "flex" }}>
+            <div>
+              <ShuttleForm
+                buildings={this.state.buildings}
+                userRole={"Guest User"}
+                onChangeBuilding={this.onChangeBuilding}
+                onBookShuttle={this.onBookShuttle}
+                onChangeSpaceType={this.onChangeSpaceType}
+                onChangePassengers={this.onChangePassengers}
+                errors={this.state.errors}
+              />
+              <ul>{errors}</ul>
+            </div>
+            <ShuttleReport
+              onCancelShuttle={this.onCancelShuttle}
+              bookings={this.state.bookings}
+            />
+          </div>
+        </Container>
+      </>
     );
   }
 }
