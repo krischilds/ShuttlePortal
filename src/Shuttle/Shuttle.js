@@ -9,10 +9,12 @@ class Shuttle extends Component {
   state = {
     bookings: null,
     buildings: null,
-    selectedPickup: -1,
-    selectedDropoff: -1,
+    resetForm: false,
+    dropBuilding: -1,
+    pickBuilding: -1,
     passengers: -1,
-    spaceType: null,
+    spaceType: -1,
+    bookShuttleButtonDisabled: false,
     errors: [],
   };
 
@@ -45,9 +47,9 @@ class Shuttle extends Component {
     console.log("e.target.name = ");
     console.log(e.target.className);
     if (e.target.className.indexOf("pickup") >= 0) {
-      this.setState({ selectedPickup: e.target.value });
+      this.setState({ pickBuilding: e.target.value });
     } else {
-      this.setState({ selectedDropoff: e.target.value });
+      this.setState({ dropBuilding: e.target.value });
     }
   };
 
@@ -83,26 +85,24 @@ class Shuttle extends Component {
 
   onBookShuttle = async (e) => {
     e.preventDefault();
-    const {
-      selectedPickup,
-      selectedDropoff,
-      passengers,
-      spaceType,
-    } = this.state;
+    // disbable book button
+    this.setState({ bookShuttleButtonDisabled: true });
+    const { pickBuilding, dropBuilding, passengers, spaceType } = this.state;
     const errors = this.validateBookingParams(
-      selectedPickup,
-      selectedDropoff,
+      pickBuilding,
+      dropBuilding,
       spaceType,
       passengers
     );
     if (errors.length) {
       this.setState({
         errors,
+        bookShuttleButtonDisabled: false,
       });
     } else {
       DataAccess.bookShuttleAsync(
-        selectedPickup,
-        selectedDropoff,
+        pickBuilding,
+        dropBuilding,
         passengers,
         spaceType
       )
@@ -113,8 +113,11 @@ class Shuttle extends Component {
             this.setState({
               errors,
               bookings,
-              selectedPickup: "-1",
-              selectedDropoff: "-1",
+              pickBuilding: -1,
+              dropBuilding: -1,
+              spaceType: -1,
+              passengers: -1,
+              bookShuttleButtonDisabled: false, // enable button
             });
           });
         })
@@ -124,7 +127,7 @@ class Shuttle extends Component {
             message:
               "Error booking shuttle. Please refresh the browser and try again.",
           });
-          this.setState({ errors });
+          this.setState({ errors, bookShuttleButtonDisabled: false });
         });
     }
   };
@@ -172,19 +175,18 @@ class Shuttle extends Component {
           <div style={{ display: "flex" }}>
             <div>
               <ShuttleForm
-                buildings={this.state.buildings}
-                userRole={"Guest User"}
+                userRole={"TODO Guest User"}
                 onChangeBuilding={this.onChangeBuilding}
                 onBookShuttle={this.onBookShuttle}
                 onChangeSpaceType={this.onChangeSpaceType}
                 onChangePassengers={this.onChangePassengers}
-                errors={this.state.errors}
+                {...this.state}
               />
               <ul>{errors}</ul>
             </div>
             <ShuttleReport
               onCancelShuttle={this.onCancelShuttle}
-              bookings={this.state.bookings}
+              {...this.state}
             />
           </div>
         </Container>

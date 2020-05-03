@@ -2,3 +2,23 @@
   font-family: sans-serif;
   text-align: center;
 }
+
+.form-section {
+  border: 1px solid #c0c0c0;
+  background-color: #f4f4f4;
+  padding: 20px;
+  border-radius: 0;
+  margin: 10px;
+  margin-top:20px;
+  min-Width: 320px;
+  max-Width: 400px;
+}
+
+.table-section {
+  border: 1px transparent;
+  border-radius: 0;
+  margin: 10px;
+  margin-top:20px;
+  min-Width: 80%;
+  max-Width: 100%;
+}

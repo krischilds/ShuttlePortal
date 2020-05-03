@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "reactstrap";
+import { Table, Button } from "reactstrap";
 
 const statusText = {
   1: "Created",
@@ -10,7 +10,7 @@ const statusText = {
   6: "Passenger In Transit",
 };
 
-export default function ShuttleReport(props) {
+const ShuttleReport = (props) => {
   let output = <div>No Active Bookings</div>;
   console.log(props);
 
@@ -19,7 +19,7 @@ export default function ShuttleReport(props) {
       getTableData(tripData, props.onCancelShuttle)
     );
     output = (
-      <table className={"table"}>
+      <Table bordered={true} style={{ backgroundColor: "white" }}>
         <thead>
           <tr>
             <th>Vehicle</th>
@@ -37,12 +37,26 @@ export default function ShuttleReport(props) {
           </tr>
         </thead>
         <tbody>{tableData}</tbody>
-      </table>
+      </Table>
     );
   }
 
-  return output;
-}
+  const debugInfo = (
+    <div>
+      <div>{props.pickBuilding}</div>
+      <div>{props.dropBuilding}</div>
+      <div>{props.spaceType}</div>
+      <div>{props.passengers}</div>
+    </div>
+  );
+
+  return (
+    <div className={"table-section"}>
+      {debugInfo}
+      {output}
+    </div>
+  );
+};
 
 const getTableData = (trip, onCancelShuttle) => {
   return (
@@ -57,6 +71,7 @@ const getTableData = (trip, onCancelShuttle) => {
       <td>{statusText[trip.status]}</td>
       <td>
         <Button
+          size={"small"}
           onClick={() => {
             onCancelShuttle(trip.confirmationNumber);
           }}
@@ -69,3 +84,5 @@ const getTableData = (trip, onCancelShuttle) => {
     </tr>
   );
 };
+
+export default ShuttleReport;

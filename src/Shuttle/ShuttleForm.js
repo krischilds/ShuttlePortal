@@ -8,34 +8,25 @@ class ShuttleForm extends Component {
   constructor(props) {
     super(props);
     this.props = props;
-
     this.state = {};
   }
 
   render() {
     const buildingOptions = getBuildingOptions(this.props.buildings);
     return (
-      <div
-        style={{
-          border: "1px solid #c0c0c0",
-          backgroundColor: "#f4f4f4",
-          padding: "20px",
-          borderRadius: "4px",
-          margin: "10px",
-          minWidth: "320px",
-          maxWidth: "400px",
-        }}
-      >
+      <div className={"form-section"}>
         <Form style={{ display: "flex", flexDirection: "column" }}>
           <FormGroup>
             <Label for="pickBuilding">Pickup Building</Label>
             <Input
-              defaultValue={"-1"}
+              defaultValue={-1}
+              value={this.props.pickBuilding}
               className="pickup"
               type="select"
               name="pick"
               id="pickBuilding"
               onChange={this.props.onChangeBuilding}
+              bsSize="sm"
             >
               <option disabled value="-1">
                 Select Pickup Building
@@ -47,11 +38,13 @@ class ShuttleForm extends Component {
           <FormGroup>
             <Label for="dropBuilding">Dropoff Building</Label>
             <Input
-              defaultValue={"-1"}
+              value={this.props.dropBuilding}
+              defaultValue={-1}
               className="dropoff"
               type="select"
               name="drop"
               id="dropBuilding"
+              bsSize="sm"
               onChange={this.props.onChangeBuilding}
             >
               <option disabled value="-1">
@@ -67,7 +60,9 @@ class ShuttleForm extends Component {
               type="select"
               name="spaceType"
               id="spaceType"
-              defaultValue={"-1"}
+              defaultValue={-1}
+              bsSize="sm"
+              value={this.props.spaceType}
               onChange={this.props.onChangeSpaceType}
             >
               <option disabled value="-1">
@@ -86,10 +81,12 @@ class ShuttleForm extends Component {
               type="select"
               name="passengers"
               id="passengers"
-              defaultValue={"-1"}
+              defaultValue={-1}
+              value={this.props.passengers}
+              bsSize="sm"
               onChange={this.props.onChangePassengers}
             >
-              <option disabled value="-1">
+              <option disabled value={-1}>
                 Select Number of Passengers
               </option>
               <option value="1">1</option>
@@ -102,7 +99,11 @@ class ShuttleForm extends Component {
             </Input>
           </FormGroup>
 
-          <Button color={"success"} onClick={this.props.onBookShuttle}>
+          <Button
+            disabled={this.props.bookShuttleButtonDisabled}
+            color={"success"}
+            onClick={this.props.onBookShuttle}
+          >
             Book Shuttle
           </Button>
         </Form>
@@ -128,13 +129,10 @@ const getBuildingOptions = (buildings) => {
   return optionsCache;
 };
 
-/*
 ShuttleForm.propTypes = {
   userRole: PropTypes.string.isRequired,
   onChangeBuilding: PropTypes.func.isRequired,
   onBookShuttle: PropTypes.func.isRequired,
-  onChangeAccountName: PropTypes.func.isRequired
 };
-*/
 
 export default ShuttleForm;
