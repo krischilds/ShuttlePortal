@@ -4,23 +4,89 @@ import { Button, Form, FormGroup, Label, Input, FormText } from "reactstrap";
 
 var optionsCache = null;
 
+const passengerRadioButtons = (passengers, onChange, selected) => {
+  let rbs = passengers.map((p) => {
+    return (
+      <FormGroup check={true} key={p}>
+        <Label check={true}>
+          <Input
+            onChange={onChange}
+            type="radio"
+            name="passengers"
+            value={p}
+            defaultChecked={selected === p}
+          />
+          {p}{" "}
+        </Label>
+      </FormGroup>
+    );
+  });
+
+  return rbs;
+};
+
+const createSpaceTypeOptions = (values, onChange, selectedValue) => {
+  let rbs = values.map((v) => {
+    return (
+      <FormGroup check={true} key={v.id}>
+        <Label check={true}>
+          <Input
+            onChange={onChange}
+            type="radio"
+            name="spaceType"
+            value={v.id}
+            defaultChecked={selectedValue === v.id}
+          />
+          {v.name}{" "}
+        </Label>
+      </FormGroup>
+    );
+  });
+
+  return rbs;
+};
+
 class ShuttleForm extends Component {
   constructor(props) {
     super(props);
     this.props = props;
     this.state = {};
+    this.passengers = [];
+
+    for (let i = 0; i < 7; i++) {
+      this.passengers[i] = i + 1;
+    }
+
+    this.spaceTypeValues = [
+      { id: "AM", name: "Ambulatory" },
+      { id: "WC", name: "Wheelchair" },
+      { id: "44", name: "Visually Impaired (44)" },
+      { id: "77", name: "Requires Assistance (77)" },
+    ];
+
+    this.passengerOptions = passengerRadioButtons(
+      this.passengers,
+      props.onChangePassengers,
+      props.passengers
+    );
+
+    this.spaceTypeOptions = createSpaceTypeOptions(
+      this.spaceTypeValues,
+      props.onChangeSpaceType,
+      props.spaceType
+    );
   }
 
   render() {
     const buildingOptions = getBuildingOptions(this.props.buildings);
+
     return (
       <div className={"form-section"}>
         <Form style={{ display: "flex", flexDirection: "column" }}>
           <FormGroup>
             <Label for="pickBuilding">Pickup Building</Label>
             <Input
-              defaultValue={-1}
-              value={this.props.pickBuilding}
+              value={this.props.pickBuildingId}
               className="pickup"
               type="select"
               name="pick"
@@ -38,8 +104,7 @@ class ShuttleForm extends Component {
           <FormGroup>
             <Label for="dropBuilding">Dropoff Building</Label>
             <Input
-              value={this.props.dropBuilding}
-              defaultValue={-1}
+              value={this.props.dropBuildingId}
               className="dropoff"
               type="select"
               name="drop"
@@ -55,48 +120,23 @@ class ShuttleForm extends Component {
           </FormGroup>
 
           <FormGroup>
-            <Label for="spaceType">Space Type</Label>
-            <Input
-              type="select"
-              name="spaceType"
-              id="spaceType"
-              defaultValue={-1}
-              bsSize="sm"
-              value={this.props.spaceType}
-              onChange={this.props.onChangeSpaceType}
+            <Label for="spaceType2">Space Type</Label>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "start",
+              }}
             >
-              <option disabled value="-1">
-                Select Space Type
-              </option>
-              <option value="AM">Ambulatory</option>
-              <option value="WC">Wheelchair</option>
-              <option value="44">44</option>
-              <option value="77">77</option>
-            </Input>
+              {this.spaceTypeOptions}
+            </div>
           </FormGroup>
 
           <FormGroup>
             <Label for="passengers">Passengers</Label>
-            <Input
-              type="select"
-              name="passengers"
-              id="passengers"
-              defaultValue={-1}
-              value={this.props.passengers}
-              bsSize="sm"
-              onChange={this.props.onChangePassengers}
-            >
-              <option disabled value={-1}>
-                Select Number of Passengers
-              </option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-            </Input>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              {this.passengerOptions}
+            </div>
           </FormGroup>
 
           <Button
@@ -118,7 +158,7 @@ const getBuildingOptions = (buildings) => {
     if (buildings && buildings.length) {
       options = buildings.map((b) => {
         return (
-          <option key={b.id} value={b.name}>
+          <option key={b.id} value={b.id}>
             {b.name}
           </option>
         );

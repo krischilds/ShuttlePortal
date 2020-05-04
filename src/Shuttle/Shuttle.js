@@ -6,20 +6,37 @@ import { Container } from "reactstrap";
 import DataAccess from "./DataAccess";
 
 class Shuttle extends Component {
-  state = {
-    bookings: null,
-    buildings: null,
-    resetForm: false,
-    dropBuilding: -1,
-    pickBuilding: -1,
-    passengers: -1,
-    spaceType: -1,
-    bookShuttleButtonDisabled: false,
-    errors: [],
-  };
+  constructor() {
+    super();
+
+    this.state = {
+      bookings: null,
+      buildings: null,
+      buildingsHash: {},
+      dropBuildingId: -1,
+      pickBuildingId: -1,
+      passengers: 1,
+      spaceType: "AM",
+      bookShuttleButtonDisabled: false,
+      errors: [],
+    };
+  }
 
   componentDidMount() {
-    this.loadData();
+    this.loadData().then(
+      (formData) => {
+        const buildingsHash = createBuildingsHash(formData.buildings);
+        this.setState({
+          bookings: formData.bookings,
+          buildings: formData.buildings,
+          buildingsHash,
+        });
+      },
+      (err) => {
+        console.log(err);
+        console.log("error loading data");
+      }
+    );
   }
 
   loadBuildings = () => {
@@ -39,17 +56,20 @@ class Shuttle extends Component {
       DataAccess.getBuildingsAsync(),
       DataAccess.getLiveBookingsAsync(),
     ]);
-    this.setState({ bookings, buildings });
+
+    return { bookings, buildings };
   };
 
   onChangeBuilding = (e) => {
     e.preventDefault();
     console.log("e.target.name = ");
     console.log(e.target.className);
+
+    let buildingId = e.target.value;
     if (e.target.className.indexOf("pickup") >= 0) {
-      this.setState({ pickBuilding: e.target.value });
+      this.setState({ pickBuildingId: buildingId });
     } else {
-      this.setState({ dropBuilding: e.target.value });
+      this.setState({ dropBuildingId: buildingId });
     }
   };
 
@@ -85,12 +105,17 @@ class Shuttle extends Component {
 
   onBookShuttle = async (e) => {
     e.preventDefault();
-    // disbable book button
+    // disable book button
     this.setState({ bookShuttleButtonDisabled: true });
-    const { pickBuilding, dropBuilding, passengers, spaceType } = this.state;
+    const {
+      pickBuildingId,
+      dropBuildingId,
+      passengers,
+      spaceType,
+    } = this.state;
     const errors = this.validateBookingParams(
-      pickBuilding,
-      dropBuilding,
+      pickBuildingId,
+      dropBuildingId,
       spaceType,
       passengers
     );
@@ -100,9 +125,12 @@ class Shuttle extends Component {
         bookShuttleButtonDisabled: false,
       });
     } else {
+      // let buildingId = encodeURIComponent(e.target.value);
+      let b1 = this.state.buildingsHash[pickBuildingId];
+      let b2 = this.state.buildingsHash[dropBuildingId];
       DataAccess.bookShuttleAsync(
-        pickBuilding,
-        dropBuilding,
+        encodeURIComponent(b1),
+        encodeURIComponent(b2),
         passengers,
         spaceType
       )
@@ -113,8 +141,8 @@ class Shuttle extends Component {
             this.setState({
               errors,
               bookings,
-              pickBuilding: -1,
-              dropBuilding: -1,
+              pickBuildingId: -1,
+              dropBuildingId: -1,
               spaceType: -1,
               passengers: -1,
               bookShuttleButtonDisabled: false, // enable button
@@ -140,20 +168,12 @@ class Shuttle extends Component {
       field: "",
     };
 
-    if (!from || from === "-1" || from === -1) {
+    if (!from || from === -1) {
       errors.push({ message: "Select a pickup building" });
     }
 
-    if (!to || to === "-1" || to === -1) {
+    if (!to || to === -1) {
       errors.push({ message: "Select a dropoff building" });
-    }
-
-    if (!spaceType || spaceType === "-1" || spaceType === -1) {
-      errors.push({ message: "Select a space type" });
-    }
-
-    if (!passengers || passengers === "-1" || passengers === -1) {
-      errors.push({ message: "Select number of passengers" });
     }
 
     return errors;
@@ -195,4 +215,11 @@ class Shuttle extends Component {
   }
 }
 
+const createBuildingsHash = (buildings) => {
+  const hash = {};
+  buildings.forEach((b) => {
+    hash[b.id] = b.name;
+  });
+  return hash;
+};
 export default Shuttle;

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Container,
   Collapse,
   Navbar,
   NavbarToggler,
@@ -11,18 +12,18 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
-  NavbarText
+  NavbarText,
 } from "reactstrap";
 
-const NavbarTop = props => {
-
+const NavbarTop = (props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggle = () => setIsOpen(!isOpen);
 
   return (
-      <div>
-        <Navbar color="dark" dark expand="md">
+    <div>
+      <Navbar color="dark" dark expand="md">
+        <Container>
           <NavbarBrand href="/">Shuttle Portal</NavbarBrand>
           <NavbarToggler onClick={toggle} />
           <Collapse isOpen={isOpen} navbar>
@@ -31,13 +32,16 @@ const NavbarTop = props => {
                 <NavLink href="/components/">Components</NavLink>
               </NavItem>
               <NavItem>
-                <NavLink href="https://github.com/reactstrap/reactstrap">GitHub</NavLink>
+                <NavLink href="https://github.com/reactstrap/reactstrap">
+                  GitHub
+                </NavLink>
               </NavItem>
             </Nav>
             <NavbarText>Sign Out</NavbarText>
           </Collapse>
-        </Navbar>
-      </div>
+        </Container>
+      </Navbar>
+    </div>
   );
 };
 

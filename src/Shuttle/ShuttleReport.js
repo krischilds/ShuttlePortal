@@ -42,7 +42,7 @@ const ShuttleReport = (props) => {
   }
 
   const debugInfo = (
-    <div>
+    <div style={{ display: "flex", padding: "10px" }}>
       <div>{props.pickBuilding}</div>
       <div>{props.dropBuilding}</div>
       <div>{props.spaceType}</div>
