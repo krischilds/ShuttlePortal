@@ -52,7 +52,7 @@ const ShuttleReport = (props) => {
 
   return (
     <div className={"table-section"}>
-      {debugInfo}
+      {/* debugInfo */}
       {output}
     </div>
   );
@@ -71,11 +71,11 @@ const getTableData = (trip, onCancelShuttle) => {
       <td>{statusText[trip.status]}</td>
       <td>
         <Button
-          size={"small"}
+          size={"sm"}
           onClick={() => {
             onCancelShuttle(trip.confirmationNumber);
           }}
-          color={"danger"}
+          color={"dark"}
           disabled={trip.status !== 1 && trip.status !== 4}
         >
           Cancel

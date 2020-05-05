@@ -28,6 +28,7 @@ const NavbarTop = (props) => {
           <NavbarToggler onClick={toggle} />
           <Collapse isOpen={isOpen} navbar>
             <Nav className="mr-auto" navbar>
+              {/*
               <NavItem>
                 <NavLink href="/components/">Components</NavLink>
               </NavItem>
@@ -36,7 +37,9 @@ const NavbarTop = (props) => {
                   GitHub
                 </NavLink>
               </NavItem>
+              */}
             </Nav>
+
             <NavbarText>Sign Out</NavbarText>
           </Collapse>
         </Container>

@@ -2,49 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Button, Form, FormGroup, Label, Input, FormText } from "reactstrap";
 
-var optionsCache = null;
-
-const passengerRadioButtons = (passengers, onChange, selected) => {
-  let rbs = passengers.map((p) => {
-    return (
-      <FormGroup check={true} key={p}>
-        <Label check={true}>
-          <Input
-            onChange={onChange}
-            type="radio"
-            name="passengers"
-            value={p}
-            defaultChecked={selected === p}
-          />
-          {p}{" "}
-        </Label>
-      </FormGroup>
-    );
-  });
-
-  return rbs;
-};
-
-const createSpaceTypeOptions = (values, onChange, selectedValue) => {
-  let rbs = values.map((v) => {
-    return (
-      <FormGroup check={true} key={v.id}>
-        <Label check={true}>
-          <Input
-            onChange={onChange}
-            type="radio"
-            name="spaceType"
-            value={v.id}
-            defaultChecked={selectedValue === v.id}
-          />
-          {v.name}{" "}
-        </Label>
-      </FormGroup>
-    );
-  });
-
-  return rbs;
-};
+var buildingsOptionsCache = null;
 
 class ShuttleForm extends Component {
   constructor(props) {
@@ -142,6 +100,7 @@ class ShuttleForm extends Component {
           <Button
             disabled={this.props.bookShuttleButtonDisabled}
             color={"success"}
+            size={"sm"}
             onClick={this.props.onBookShuttle}
           >
             Book Shuttle
@@ -154,7 +113,7 @@ class ShuttleForm extends Component {
 
 const getBuildingOptions = (buildings) => {
   var options = null;
-  if (!optionsCache) {
+  if (!buildingsOptionsCache) {
     if (buildings && buildings.length) {
       options = buildings.map((b) => {
         return (
@@ -164,9 +123,51 @@ const getBuildingOptions = (buildings) => {
         );
       });
     }
-    optionsCache = options;
+    buildingsOptionsCache = options;
   }
-  return optionsCache;
+  return buildingsOptionsCache;
+};
+
+const passengerRadioButtons = (passengers, onChange, selected) => {
+  let rbs = passengers.map((p) => {
+    return (
+      <FormGroup check={true} key={p}>
+        <Label check={true}>
+          <Input
+            onChange={onChange}
+            type="radio"
+            name="passengers"
+            value={p}
+            defaultChecked={selected === p}
+          />
+          {p}{" "}
+        </Label>
+      </FormGroup>
+    );
+  });
+
+  return rbs;
+};
+
+const createSpaceTypeOptions = (values, onChange, selectedValue) => {
+  let rbs = values.map((v) => {
+    return (
+      <FormGroup check={true} key={v.id}>
+        <Label check={true}>
+          <Input
+            onChange={onChange}
+            type="radio"
+            name="spaceType"
+            value={v.id}
+            defaultChecked={selectedValue === v.id}
+          />
+          {v.name}{" "}
+        </Label>
+      </FormGroup>
+    );
+  });
+
+  return rbs;
 };
 
 ShuttleForm.propTypes = {
