@@ -2,14 +2,22 @@ import React, { Component } from "react";
 import ShuttleForm from "./ShuttleForm";
 import ShuttleReport from "./ShuttleReport";
 import NavbarTop from "./NavbarTop";
-import { Container } from "reactstrap";
+import { Button, Container } from "reactstrap";
 import DataAccess from "./DataAccess";
+import {
+  msalApp,
+  LOGIN_SCOPES,
+  acquireToken,
+  fetchAPI,
+  API_SCOPES,
+} from "../auth-utils";
 
 class Shuttle extends Component {
   constructor() {
     super();
 
     this.state = {
+      authenticated: false,
       bookings: null,
       buildings: null,
       buildingsHash: {},
@@ -160,6 +168,36 @@ class Shuttle extends Component {
     }
   };
 
+  onSignIn = (e) => {
+    //alert("Sign In");
+    //this.setState({ authenticated: true });
+    //const allScopes = [...LOGIN_SCOPES, ...API_SCOPES];
+    msalApp.loginPopup([...API_SCOPES]).then((loginResponse) => {
+      // console.log("Login Response = ", loginResponse);
+      const API_ENDPOINT = `https://apis.msshuttleservices.com/api/Location/GetBuildingsList`;
+      // const API_ENDPOINT = `https://apis.msshuttleservices.com/ShuttlePortal/api/MvApi/liveTrips/ALL`;
+      acquireToken().then((tokenResponse) => {
+        console.log("tokenResponse", tokenResponse.accessToken);
+        const apiResponse = fetchAPI(API_ENDPOINT, tokenResponse.accessToken);
+        apiResponse
+          .then((result) => {
+            const statusCode = result.status;
+            console.log(statusCode);
+            if (statusCode === 200) {
+              this.setState({ authenticated: true });
+            } else {
+              this.setState({ authenticated: false });
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+    });
+  };
+
+  testAPI = () => {};
+
   validateBookingParams(from, to, spaceType, passengers) {
     const errors = [];
 
@@ -188,9 +226,14 @@ class Shuttle extends Component {
       );
     });
 
+    const testApiButton = this.state.authenticated && <Button>Test API</Button>;
+
     return (
       <>
-        <NavbarTop />
+        <NavbarTop
+          onSignIn={this.onSignIn}
+          authenticated={this.state.authenticated}
+        />
         <Container>
           <div style={{ display: "flex" }}>
             <div>
@@ -204,6 +247,7 @@ class Shuttle extends Component {
               />
               <ul>{errors}</ul>
             </div>
+            {testApiButton}
             <ShuttleReport
               onCancelShuttle={this.onCancelShuttle}
               {...this.state}

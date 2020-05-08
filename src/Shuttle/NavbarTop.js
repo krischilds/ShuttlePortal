@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Button,
   Container,
   Collapse,
   Navbar,
@@ -17,8 +18,12 @@ import {
 
 const NavbarTop = (props) => {
   const [isOpen, setIsOpen] = useState(false);
-
   const toggle = () => setIsOpen(!isOpen);
+
+  let signInButton = props.authenticated && <div>User is Authenticated!!!</div>;
+  if (!props.authenticated) {
+    signInButton = <div>User IS NOT Authenticated</div>;
+  }
 
   return (
     <div>
@@ -28,6 +33,7 @@ const NavbarTop = (props) => {
           <NavbarToggler onClick={toggle} />
           <Collapse isOpen={isOpen} navbar>
             <Nav className="mr-auto" navbar>
+              <NavItem style={{ color: "white" }}>{signInButton}</NavItem>
               {/*
               <NavItem>
                 <NavLink href="/components/">Components</NavLink>
@@ -40,7 +46,11 @@ const NavbarTop = (props) => {
               */}
             </Nav>
 
-            <NavbarText>Sign Out</NavbarText>
+            <NavbarText>
+              <Button onClick={props.onSignIn} size={"sm"}>
+                Sign In
+              </Button>
+            </NavbarText>
           </Collapse>
         </Container>
       </Navbar>
